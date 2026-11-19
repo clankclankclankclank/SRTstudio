@@ -11,6 +11,7 @@ settings_whisper_gpu.json
 !docs/assets/voiceover.srt
 *.wav
 *.mp3
+!docs/assets/sample.mp3
 *.m4a
 *.mp4
 *.mov

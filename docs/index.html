@@ -3,58 +3,69 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="SRT Studio is a local subtitle workbench for creators. Queue voiceovers, transcribe on your own hardware, and export SRT, VTT, or text.">
+  <meta name="description" content="Generate SRT subtitles from audio in your browser. SRT Studio transcribes on your device using Whisper. No upload or install.">
   <meta name="theme-color" content="#141613">
-  <title>SRT Studio — Local subtitle workbench</title>
+  <title>SRT Studio — Browser subtitle workbench</title>
   <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./studio.css">
-  <script defer src="./studio.js"></script>
+  <script type="module" src="./studio.js"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="top wrap">
-    <a class="brand" href="./"><img src="./assets/mark.svg" width="34" height="34" alt=""><span>SRT Studio <small>LOCAL SUBTITLE WORKBENCH</small></span></a>
-    <nav aria-label="Main navigation"><a href="#preview">Preview</a><a href="#setup">Setup</a><a class="source" href="https://github.com/clankclankclankclank/SRTstudio">GitHub <span aria-hidden="true">↗</span></a></nav>
+    <a class="brand" href="./"><img src="./assets/mark.svg" width="34" height="34" alt=""><span>SRT Studio <small>SUBTITLE WORKBENCH</small></span></a>
+    <nav aria-label="Main navigation"><a href="#workbench">Workbench</a><a href="#desktop">Desktop edition</a><a class="source" href="https://github.com/clankclankclankclank/SRTstudio">GitHub <span aria-hidden="true">↗</span></a></nav>
   </header>
-  <main id="main">
-    <section class="hero wrap" aria-labelledby="intro">
-      <div class="hero-copy">
-        <div class="eyebrow"><span></span> LOCAL GPU EDITION</div>
-        <h1 id="intro">Your audio.<br><em>In captions.</em></h1>
-        <p class="lede">Turn a folder of voiceovers into subtitles you can drop straight into your edit. Your media stays on your machine.</p>
-        <div class="actions"><a class="button primary" href="#setup">Run SRT Studio <span aria-hidden="true">↗</span></a><a class="button ghost" href="#preview">See a sample <span aria-hidden="true">↓</span></a></div>
-        <div class="spec"><span>NVIDIA CUDA</span><span>SRT / VTT / TXT</span><span>BATCH QUEUE</span></div>
+  <main id="main" class="wrap">
+    <section class="hero" aria-labelledby="intro">
+      <div>
+        <div class="eyebrow"><span></span> BROWSER EDITION · ON-DEVICE WHISPER</div>
+        <h1 id="intro">Your audio. <em>In captions.</em></h1>
+        <p class="lede">Drop your voiceovers and get timed subtitles. No install, and your media stays on this device.</p>
       </div>
-      <div class="preview" id="preview" aria-label="Interactive subtitle preview with a sample voiceover">
-        <div class="readout"><span><b></b> STUDIO WORKBENCH</span><span>CAPTION PREVIEW</span></div>
-        <div class="deck">
-          <div class="file"><span class="file-mark" aria-hidden="true">↝</span><div><strong>voiceover.wav</strong><small>SAMPLE FILE</small></div><div class="time" id="timeline">00:00:01.550</div></div>
-          <div class="signal" aria-hidden="true"><svg viewBox="0 0 500 115" preserveAspectRatio="none" focusable="false">
-            <defs><linearGradient id="signal-gradient"><stop stop-color="#65784a"/><stop offset=".67" stop-color="#def792"/><stop offset="1" stop-color="#9ab169"/></linearGradient></defs>
-            <path id="signal-bars" d="M12 57H488" stroke="url(#signal-gradient)" stroke-linecap="round" stroke-width="2.1"/></svg><div id="cursor"></div></div>
-          <div class="ruler" aria-hidden="true"><span>00.0</span><span>03.5</span><span>07.0</span><span>10.5</span></div>
-          <div class="cue" aria-live="polite"><small id="cue-time">00:00.0 → 00:03.1</small><p id="cue-label">The city sounds different before sunrise.</p></div>
-          <div class="cue-foot"><div class="cue-buttons" aria-label="Sample subtitle cues"><button type="button" data-cue="0" aria-label="Cue 1" aria-pressed="true">01</button><button type="button" data-cue="1" aria-label="Cue 2" aria-pressed="false">02</button><button type="button" data-cue="2" aria-label="Cue 3" aria-pressed="false">03</button></div>
-            <a href="./assets/voiceover.srt" download>Sample SRT <span aria-hidden="true">↓</span></a>
-          </div>
+      <svg id="hero-signal" class="hero-signal" viewBox="0 0 400 100" aria-hidden="true" focusable="false">
+        <defs><linearGradient id="signal-grad"><stop stop-color="#59674b"/><stop offset=".65" stop-color="#dafa87"/><stop offset="1" stop-color="#829160"/></linearGradient></defs>
+        <path id="signal-bars" d="M0 50H400" fill="none" stroke="url(#signal-grad)" stroke-linecap="round" stroke-width="2"/>
+      </svg>
+    </section>
+    <noscript><p class="notice">Enable JavaScript to use SRT Studio in your browser.</p></noscript>
+    <section class="workbench" id="workbench" aria-label="Transcription workspace">
+      <div class="panel queue-panel">
+        <div class="panel-head"><div><div class="kicker">01 / INPUT</div><h2>Media queue <span class="counter" id="counter">0</span></h2></div><button type="button" class="quiet" id="clear-queue" disabled>Clear queue</button></div>
+        <div id="drop-zone" class="drop-zone">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M4 15v5h16v-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><strong>Drop audio files here</strong><small>WAV, MP3, M4A, FLAC and more*</small></div>
+          <button type="button" class="button secondary" id="browse" disabled>Browse files</button>
+          <input type="file" id="media-files" accept="audio/*,.wav,.mp3,.m4a,.aac,.flac,.ogg,.opus,.webm,.mp4" multiple hidden>
         </div>
-        <div class="preview-note">Sample captions only. Transcription runs in the local app.</div>
+        <div class="queue-footer"><span>*Formats your browser can decode</span><button type="button" class="quiet" id="sample" disabled>Try with sample audio ↗</button></div>
+        <ul class="queue" id="queue" aria-label="Queued media"></ul>
+        <div class="options">
+          <label>Model<select id="model"><option value="tiny">Whisper Tiny · faster</option><option value="base">Whisper Base · more accurate</option></select></label>
+          <label>Spoken language<select id="language"><option value="">Auto-detect</option><option value="en">English</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="zh">Chinese</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="pt">Portuguese</option><option value="it">Italian</option><option value="hi">Hindi</option><option value="ar">Arabic</option><option value="ru">Russian</option></select></label>
+          <label>Compute<select id="device"><option value="auto">Auto · prefer WebGPU</option><option value="wasm">CPU · compatibility mode</option></select></label>
+        </div>
+        <div id="notice" class="notice" role="alert" hidden></div>
+        <div class="transport"><div><strong id="status" role="status">Ready to transcribe</strong><small id="detail">First use downloads the selected Whisper model.</small></div><button type="button" id="cancel" class="button secondary" hidden>Stop</button><button type="button" id="start" class="button primary" disabled><span aria-hidden="true">▶</span> Transcribe</button></div>
+        <progress id="progress" aria-label="Model or batch progress" hidden></progress>
+      </div>
+      <div class="panel result-panel">
+        <div class="panel-head"><div><div class="kicker">02 / OUTPUT</div><h2>Subtitles</h2></div><button type="button" class="quiet" id="zip" hidden>Download batch SRTs ↓</button></div>
+        <div class="empty" id="result-empty"><span aria-hidden="true">CC</span><strong>No captions yet</strong><small>Run a file to preview its timed cues and export subtitles.</small></div>
+        <div class="result-content" id="result-content" hidden>
+          <label class="result-label">Output file<select id="output-file" aria-label="Select a transcribed file"></select></label>
+          <audio id="audio" controls preload="metadata" aria-label="Play the original audio"></audio>
+          <div class="caption-header"><span id="cue-count"></span><span>CLICK A TIMESTAMP TO SEEK</span></div>
+          <div class="captions" id="captions" aria-label="Transcribed cues"></div>
+          <div class="exports"><button type="button" class="button primary" data-format="srt">Download SRT ↓</button><button type="button" class="button secondary" data-format="vtt">VTT ↓</button><button type="button" class="button secondary" data-format="txt">TXT ↓</button></div>
+        </div>
       </div>
     </section>
-    <div class="rule" aria-hidden="true"></div>
-    <section class="features wrap" aria-label="Workbench features">
-      <article><span class="feature-no">01 / QUEUE</span><h2>One folder. One batch.</h2><p>Add audio or video, reorder the queue, and process everything with the same settings.</p></article>
-      <article><span class="feature-no">02 / COMPUTE</span><h2>Use your own GPU.</h2><p>Pick a device, model, and precision. Follow progress and VRAM from the workbench.</p></article>
-      <article><span class="feature-no">03 / EXPORT</span><h2>Ready for the edit.</h2><p>Export SRT, WebVTT, or plain text. Keep exports beside the source or send them to one folder.</p></article>
-    </section>
-    <section class="setup wrap" id="setup" aria-labelledby="setup-title">
-      <div><div class="eyebrow"><span></span> QUICK START</div><h2 id="setup-title">Run it locally.</h2><p>Use Python 3.10+ with FFmpeg on PATH. For NVIDIA acceleration, use a CUDA-enabled PyTorch build compatible with your GPU. Whisper may download model weights the first time you run it.</p><a class="button ghost" href="https://github.com/clankclankclankclank/SRTstudio#quick-start">Read the setup notes <span aria-hidden="true">↗</span></a></div>
-      <div class="terminal"><div><span></span><span></span><span></span><b>POWERSHELL</b><button type="button" id="copy-setup" hidden>Copy</button></div><pre><code id="setup-commands">git clone https://github.com/clankclankclankclank/SRTstudio.git
-cd SRTstudio
-python -m pip install -r requirements.txt
-python srt_studio.py</code></pre></div>
+    <section class="desktop" id="desktop" aria-label="Desktop edition">
+      <div><div class="kicker">DESKTOP EDITION</div><h2>Need the full GPU workbench?</h2><p>Use the Python edition for CUDA, FFmpeg format support, and larger batches.</p></div>
+      <a href="https://github.com/clankclankclankclank/SRTstudio#desktop-edition" class="button secondary">Desktop setup ↗</a>
     </section>
   </main>
-  <footer class="wrap floor"><a class="brand" href="./"><img src="./assets/mark.svg" width="26" height="26" alt=""><span>SRT Studio</span></a><span>LOCAL BY DESIGN</span><a href="https://github.com/clankclankclankclank/SRTstudio">Source on GitHub ↗</a></footer>
+  <footer class="floor wrap"><a class="brand" href="./"><img src="./assets/mark.svg" width="25" height="25" alt=""><span>SRT Studio</span></a><span>MEDIA IS PROCESSED ON YOUR DEVICE</span><a href="https://github.com/clankclankclankclank/SRTstudio">Source on GitHub ↗</a></footer>
 </body>
 </html>
