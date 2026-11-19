@@ -4,7 +4,7 @@
 
 ## Browser edition
 
-[Open SRT Studio on GitHub Pages](https://clankclankclankclank.github.io/SRTstudio/). Add audio files or try the included sample, select a Whisper model, and press **Transcribe**. Click a cue to seek in the original audio, then download SRT, WebVTT, or plain text. Use **Download batch SRTs** for a ZIP when two or more files finish.
+[Open SRT Studio on GitHub Pages](https://clankclankclankclank.github.io/SRTstudio/). Add audio files or try the included sample, select a Whisper model, and press **Transcribe**. Click a cue to seek in the original audio, then download SRT, WebVTT, or plain text. Use **Batch ZIP** for a ZIP when two or more files finish.
 
 The browser edition uses [Transformers.js](https://huggingface.co/docs/transformers.js/) and quantized Whisper weights. Auto compute tries WebGPU when available and falls back to CPU/WASM. The first run downloads the runtime and model weights to your browser. Your media is decoded and transcribed on your device and is not uploaded.
 
