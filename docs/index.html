@@ -9,6 +9,8 @@
   <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./workbench.v2.css">
   <link rel="stylesheet" href="./release.css">
+  <link rel="stylesheet" href="./github-buttons.css">
+  <script defer src="./github-buttons.js"></script>
   <script type="module" src="./workbench.v3.js"></script>
 </head>
 <body>
@@ -27,7 +29,11 @@
   <header class="top">
     <div class="wrap top-inner">
       <a class="brand" href="./" aria-label="SRT Studio home"><img src="./assets/mark.svg" width="34" height="34" alt=""><span>SRT Studio<small>SUBTITLE WORKBENCH</small></span></a>
-      <nav aria-label="Main navigation"><a class="download-nav" href="#desktop">Download</a><a class="nav-button" href="https://github.com/clankclankclankclank/SRTstudio">GitHub <svg class="icon" aria-hidden="true"><use href="#i-next"/></svg></a></nav>
+      <nav class="repo-nav" aria-label="Main navigation">
+        <a class="download-nav" href="#desktop">Download</a>
+        <a class="repo-button repo-source" href="https://github.com/clankclankclankclank/SRTstudio" target="_blank" rel="noopener noreferrer" aria-label="View SRT Studio on GitHub"><img src="./assets/github/github-mark-white.png" alt="" width="16" height="16"><span class="repo-source-label">GitHub</span></a>
+        <a class="repo-button repo-star" href="https://github.com/clankclankclankclank/SRTstudio" target="_blank" rel="noopener noreferrer" aria-label="Star SRT Studio on GitHub"><span class="repo-star-icon"><img src="./assets/github/github-star.png" alt="" width="16" height="16"></span><span>Star<span class="repo-star-label-extra"> on GitHub</span></span><span class="repo-count" data-star-count aria-hidden="true" hidden></span></a>
+      </nav>
     </div>
   </header>
   <main id="main" class="wrap">
@@ -101,7 +107,7 @@
       <div class="release-meta"><span>The ZIP is source-based. Dependencies and model weights download separately.</span><div><a href="./downloads/SRT-Studio-0.1.0-Windows.sha256">SHA-256</a><a href="https://github.com/clankclankclankclank/SRTstudio/releases">GitHub Releases</a></div></div>
     </section>
   </main>
-  <footer class="floor wrap"><a class="brand" href="./"><img src="./assets/mark.svg" width="22" height="22" alt=""><span>SRT Studio</span></a><span>MEDIA STAYS ON YOUR DEVICE</span><a href="https://github.com/clankclankclankclank/SRTstudio">Source on GitHub <svg class="icon" aria-hidden="true"><use href="#i-next"/></svg></a></footer>
+  <footer class="floor wrap"><a class="brand" href="./"><img src="./assets/mark.svg" width="22" height="22" alt=""><span>SRT Studio</span></a><span>MEDIA STAYS ON YOUR DEVICE</span><div class="footer-repo"><a class="repo-button repo-star" href="https://github.com/clankclankclankclank/SRTstudio" target="_blank" rel="noopener noreferrer" aria-label="Star SRT Studio on GitHub"><span class="repo-star-icon"><img src="./assets/github/github-star.png" alt="" width="16" height="16"></span><span>Star<span class="repo-star-label-extra"> on GitHub</span></span><span class="repo-count" data-star-count aria-hidden="true" hidden></span></a></div></footer>
   <script>
     window.addEventListener("load", () => {
       if (!document.documentElement.dataset.ready) document.getElementById("boot-notice").hidden = false;

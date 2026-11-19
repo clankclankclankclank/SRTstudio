@@ -1,0 +1,20 @@
+.top nav.repo-nav{gap:7px;white-space:nowrap}
+.repo-nav .download-nav{margin-right:5px}
+.repo-button{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:33px;padding:0 8px;border:1px solid #3d493b;border-radius:7px;background:#20271f;color:#edf2e9;font-weight:660;font-size:11px;white-space:nowrap;transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease}
+.repo-button img{display:block;width:16px;height:16px;object-fit:contain;flex:none}
+.repo-button.repo-source:hover,.repo-button.repo-source:focus-visible{color:#f5f8ef;background:#2b372a;border-color:#586d50}
+.repo-button.repo-star{background:#343427;color:#f7e7ac;border-color:#655d3e}
+.repo-button.repo-star:hover,.repo-button.repo-star:focus-visible{color:#fff0ba;background:#49422c;border-color:#8a7851;box-shadow:0 0 17px #edc86e20;transform:translateY(-1px)}
+.repo-button:active{transform:translateY(1px)}
+.repo-star-icon{position:relative;display:grid;place-items:center;width:16px;height:17px;flex:none}
+.repo-star-icon::after{content:"";width:3px;height:3px;border-radius:50%;position:absolute;top:2px;right:1px;background:#ffed91;color:#ffed91;opacity:0;pointer-events:none}
+.repo-star:hover img,.repo-star:focus-visible img{animation:star-pop .39s cubic-bezier(.19,.74,.43,1.15) both}
+.repo-star:hover .repo-star-icon::after,.repo-star:focus-visible .repo-star-icon::after{animation:star-spark .42s ease-out both}
+@keyframes star-pop{0%,100%{transform:rotate(0) scale(1)}45%{transform:rotate(-16deg) scale(1.2)}75%{transform:rotate(6deg) scale(1.06)}}
+@keyframes star-spark{0%{opacity:0;box-shadow:0 0,0 0}40%{opacity:1;box-shadow:-16px 2px,1px 15px}100%{opacity:0;box-shadow:-18px 4px,4px 18px;transform:translate(3px,-3px)}}
+.repo-count{padding:1px 5px;margin-left:1px;border-radius:4px;background:#16181276;color:#f1db96;font:10px/1.35 var(--mono);font-variant-numeric:tabular-nums}
+.footer-repo{display:flex;align-items:center;gap:6px}
+.footer-repo .repo-button{min-height:30px}
+@media(max-width:520px){.top nav.repo-nav,.footer-repo{gap:5px}.repo-nav .download-nav{margin-right:0;font-size:11px}.repo-nav .repo-source-label,.repo-star-label-extra{display:none}.repo-button{padding-inline:7px;min-height:32px}.repo-count{padding-inline:3px}.footer-repo .repo-source-label{display:none}}
+@media(max-width:330px){.repo-nav .download-nav{display:none}.repo-button{padding-inline:6px}.repo-nav .repo-count{display:none}}
+@media(prefers-reduced-motion:reduce){.repo-button,.repo-star img,.repo-star .repo-star-icon::after{transition:none!important;animation:none!important;transform:none!important}}
