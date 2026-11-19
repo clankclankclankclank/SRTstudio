@@ -12,6 +12,10 @@ Use a recent Chromium browser for the best compatibility. The web app supports f
 
 ## Desktop edition
 
+[Download the Windows package](https://clankclankclankclank.github.io/SRTstudio/downloads/SRT-Studio-0.1.0-Windows.zip) · [GitHub Releases](https://github.com/clankclankclankclank/SRTstudio/releases)
+
+Extract the ZIP, run **Install-SRT-Studio.cmd**, and choose NVIDIA CUDA or CPU. Internet is required for initial setup. Use **Prepare-Offline.cmd** to cache and select Turbo or Small. Open **Start-SRT-Studio.cmd** to transcribe offline with that cached model. The ZIP is source-based and requires Python and FFmpeg.
+
 The Python app opens a browser interface on your machine. Whisper runs locally, on NVIDIA CUDA when available or on the CPU. The workbench does not upload your media to a remote service. Whisper may download the chosen model on first use.
 
 ### Quick start
@@ -26,6 +30,8 @@ python srt_studio.py
 ```
 
 Open the terminal URL if your browser does not launch. Use **Exit Studio** or press **Ctrl+C** in the terminal when you're done.
+
+To prepare a model from a source checkout, run `python prepare_offline.py turbo --select` while online. Add `SRT_STUDIO_MODEL_DIR` to your environment to choose a separate cache directory for both the app and the preparation script.
 
 If you're migrating from the original GPU script, put `settings_whisper_gpu.json` beside `srt_studio.py` to carry over its presets. Keep this file out of Git.
 
@@ -45,6 +51,7 @@ If you're migrating from the original GPU script, put `settings_whisper_gpu.json
 | `docs/` | GitHub Pages app, Web Worker, browser exports, and sample audio |
 | `tests/smoke.py` | Simulated-engine integration test for the local API and export workflow |
 | `tests/web.mjs` | Browser app caption and ZIP serialization tests |
+| `scripts/build_release.py` | Builds the Windows ZIP and SHA-256 file |
 
 To publish the static app from a fork, select **Settings → Pages → Deploy from a branch → main → /docs**. Do not open the page from a `file://` URL because the worker uses ES modules.
 
@@ -62,4 +69,4 @@ The smoke test exercises queue ordering, cancellation, CUDA telemetry, settings 
 
 - Split out the app UI and move the workbench to React without changing the batch workflow.
 - Compare PyTorch and faster-whisper on the same short and long clips. Measure cold start, warm batch time, peak VRAM, and caption quality before changing defaults.
-- Package the Windows edition and benchmark browser model size, speed, and accuracy.
+- Benchmark browser model size, speed, and accuracy on more voiceovers.

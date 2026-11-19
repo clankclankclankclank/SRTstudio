@@ -568,7 +568,13 @@ class Studio:
                 self.free_gpu(old[1])
             self.set_batch(phase="loading", message=f"Loading {name} on {device}", file_progress=None)
             self.activity(f"Loading {name} on {device}. First use may download weights.")
-            self.cached_model = self.whisper.load_model(name, device=device)
+            local_root = os.environ.get("SRT_STUDIO_MODEL_DIR")
+            if local_root:
+                self.cached_model = self.whisper.load_model(
+                    name, device=device, download_root=str(Path(local_root).expanduser().resolve())
+                )
+            else:
+                self.cached_model = self.whisper.load_model(name, device=device)
             self.cached_key = key
         return self.cached_model
 

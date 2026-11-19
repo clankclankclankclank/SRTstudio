@@ -22,3 +22,6 @@ settings_whisper_gpu.json
 dist/
 .DS_Store
 Thumbs.db
+
+# Desktop model cache
+models/

@@ -8,6 +8,7 @@
   <title>SRT Studio — Online subtitle workbench</title>
   <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./workbench.v2.css">
+  <link rel="stylesheet" href="./release.css">
   <script type="module" src="./workbench.v3.js"></script>
 </head>
 <body>
@@ -26,7 +27,7 @@
   <header class="top">
     <div class="wrap top-inner">
       <a class="brand" href="./" aria-label="SRT Studio home"><img src="./assets/mark.svg" width="34" height="34" alt=""><span>SRT Studio<small>SUBTITLE WORKBENCH</small></span></a>
-      <nav aria-label="Main navigation"><a class="desktop-link" href="#desktop">Desktop edition</a><a class="nav-button" href="https://github.com/clankclankclankclank/SRTstudio">GitHub <svg class="icon" aria-hidden="true"><use href="#i-next"/></svg></a></nav>
+      <nav aria-label="Main navigation"><a class="download-nav" href="#desktop">Download</a><a class="nav-button" href="https://github.com/clankclankclankclank/SRTstudio">GitHub <svg class="icon" aria-hidden="true"><use href="#i-next"/></svg></a></nav>
     </div>
   </header>
   <main id="main" class="wrap">
@@ -91,9 +92,13 @@
         </div>
       </div>
     </section>
-    <section class="desktop" id="desktop" aria-label="Desktop edition">
-      <div><span class="kicker">DESKTOP EDITION</span><h2>More formats and larger batches</h2><p>Run CUDA and FFmpeg locally with the Python edition.</p></div>
-      <a href="https://github.com/clankclankclankclank/SRTstudio#desktop-edition" class="button secondary">Desktop setup <svg class="icon" aria-hidden="true"><use href="#i-next"/></svg></a>
+    <section class="desktop download-panel" id="desktop" aria-labelledby="desktop-title">
+      <div class="download-top">
+        <div class="desktop-copy"><span class="kicker">DESKTOP EDITION · V0.1.0</span><h2 id="desktop-title">SRT Studio for Windows</h2><p>Transcribe larger batches with CUDA or CPU. Prepare a model once, then generate subtitles on your PC without internet.</p></div>
+        <div class="download-action"><a class="button primary" href="./downloads/SRT-Studio-0.1.0-Windows.zip" download><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg> Download for Windows</a><p>WINDOWS X64 · ZIP</p></div>
+      </div>
+      <ol class="desktop-steps"><li><strong>Extract the ZIP</strong>Install Python and FFmpeg if you don’t have them.</li><li><strong>Set up once, online</strong>Run Install-SRT-Studio.cmd and prepare Turbo or Small.</li><li><strong>Run locally or offline</strong>Open Start-SRT-Studio.cmd. Your audio stays on your PC.</li></ol>
+      <div class="release-meta"><span>The ZIP is source-based. Dependencies and model weights download separately.</span><div><a href="./downloads/SRT-Studio-0.1.0-Windows.sha256">SHA-256</a><a href="https://github.com/clankclankclankclank/SRTstudio/releases">GitHub Releases</a></div></div>
     </section>
   </main>
   <footer class="floor wrap"><a class="brand" href="./"><img src="./assets/mark.svg" width="22" height="22" alt=""><span>SRT Studio</span></a><span>MEDIA STAYS ON YOUR DEVICE</span><a href="https://github.com/clankclankclankclank/SRTstudio">Source on GitHub <svg class="icon" aria-hidden="true"><use href="#i-next"/></svg></a></footer>
