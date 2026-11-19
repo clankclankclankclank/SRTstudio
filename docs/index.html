@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="SRT Studio is a local subtitle workbench for creators. Queue voiceovers, transcribe on your own hardware, and export SRT, VTT, or text.">
+  <meta name="theme-color" content="#141613">
+  <title>SRT Studio — Local subtitle workbench</title>
+  <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./studio.css">
+  <script defer src="./studio.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top wrap">
+    <a class="brand" href="./"><img src="./assets/mark.svg" width="34" height="34" alt=""><span>SRT Studio <small>LOCAL SUBTITLE WORKBENCH</small></span></a>
+    <nav aria-label="Main navigation"><a href="#preview">Preview</a><a href="#setup">Setup</a><a class="source" href="https://github.com/clankclankclankclank/SRTstudio">GitHub <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="intro">
+      <div class="hero-copy">
+        <div class="eyebrow"><span></span> LOCAL GPU EDITION</div>
+        <h1 id="intro">Your audio.<br><em>In captions.</em></h1>
+        <p class="lede">Turn a folder of voiceovers into subtitles you can drop straight into your edit. Your media stays on your machine.</p>
+        <div class="actions"><a class="button primary" href="#setup">Run SRT Studio <span aria-hidden="true">↗</span></a><a class="button ghost" href="#preview">See a sample <span aria-hidden="true">↓</span></a></div>
+        <div class="spec"><span>NVIDIA CUDA</span><span>SRT / VTT / TXT</span><span>BATCH QUEUE</span></div>
+      </div>
+      <div class="preview" id="preview" aria-label="Interactive subtitle preview with a sample voiceover">
+        <div class="readout"><span><b></b> STUDIO WORKBENCH</span><span>CAPTION PREVIEW</span></div>
+        <div class="deck">
+          <div class="file"><span class="file-mark" aria-hidden="true">↝</span><div><strong>voiceover.wav</strong><small>SAMPLE FILE</small></div><div class="time" id="timeline">00:00:01.550</div></div>
+          <div class="signal" aria-hidden="true"><svg viewBox="0 0 500 115" preserveAspectRatio="none" focusable="false">
+            <defs><linearGradient id="signal-gradient"><stop stop-color="#65784a"/><stop offset=".67" stop-color="#def792"/><stop offset="1" stop-color="#9ab169"/></linearGradient></defs>
+            <path id="signal-bars" d="M12 57H488" stroke="url(#signal-gradient)" stroke-linecap="round" stroke-width="2.1"/></svg><div id="cursor"></div></div>
+          <div class="ruler" aria-hidden="true"><span>00.0</span><span>03.5</span><span>07.0</span><span>10.5</span></div>
+          <div class="cue" aria-live="polite"><small id="cue-time">00:00.0 → 00:03.1</small><p id="cue-label">The city sounds different before sunrise.</p></div>
+          <div class="cue-foot"><div class="cue-buttons" aria-label="Sample subtitle cues"><button type="button" data-cue="0" aria-label="Cue 1" aria-pressed="true">01</button><button type="button" data-cue="1" aria-label="Cue 2" aria-pressed="false">02</button><button type="button" data-cue="2" aria-label="Cue 3" aria-pressed="false">03</button></div>
+            <a href="./assets/voiceover.srt" download>Sample SRT <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+        <div class="preview-note">Sample captions only. Transcription runs in the local app.</div>
+      </div>
+    </section>
+    <div class="rule" aria-hidden="true"></div>
+    <section class="features wrap" aria-label="Workbench features">
+      <article><span class="feature-no">01 / QUEUE</span><h2>One folder. One batch.</h2><p>Add audio or video, reorder the queue, and process everything with the same settings.</p></article>
+      <article><span class="feature-no">02 / COMPUTE</span><h2>Use your own GPU.</h2><p>Pick a device, model, and precision. Follow progress and VRAM from the workbench.</p></article>
+      <article><span class="feature-no">03 / EXPORT</span><h2>Ready for the edit.</h2><p>Export SRT, WebVTT, or plain text. Keep exports beside the source or send them to one folder.</p></article>
+    </section>
+    <section class="setup wrap" id="setup" aria-labelledby="setup-title">
+      <div><div class="eyebrow"><span></span> QUICK START</div><h2 id="setup-title">Run it locally.</h2><p>Use Python 3.10+ with FFmpeg on PATH. For NVIDIA acceleration, use a CUDA-enabled PyTorch build compatible with your GPU. Whisper may download model weights the first time you run it.</p><a class="button ghost" href="https://github.com/clankclankclankclank/SRTstudio#quick-start">Read the setup notes <span aria-hidden="true">↗</span></a></div>
+      <div class="terminal"><div><span></span><span></span><span></span><b>POWERSHELL</b><button type="button" id="copy-setup" hidden>Copy</button></div><pre><code id="setup-commands">git clone https://github.com/clankclankclankclank/SRTstudio.git
+cd SRTstudio
+python -m pip install -r requirements.txt
+python srt_studio.py</code></pre></div>
+    </section>
+  </main>
+  <footer class="wrap floor"><a class="brand" href="./"><img src="./assets/mark.svg" width="26" height="26" alt=""><span>SRT Studio</span></a><span>LOCAL BY DESIGN</span><a href="https://github.com/clankclankclankclank/SRTstudio">Source on GitHub ↗</a></footer>
+</body>
+</html>

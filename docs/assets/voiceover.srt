@@ -1,0 +1,11 @@
+1
+00:00:00,000 --> 00:00:03,100
+The city sounds different before sunrise.
+
+2
+00:00:03,100 --> 00:00:06,700
+Even the busiest streets go quiet.
+
+3
+00:00:06,700 --> 00:00:10,500
+For a few minutes, the whole place feels like yours.
