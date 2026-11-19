@@ -6,7 +6,7 @@
 
 [Open SRT Studio on GitHub Pages](https://clankclankclankclank.github.io/SRTstudio/). Add audio files or try the included sample, select a Whisper model, and press **Transcribe**. Click a cue to seek in the original audio, then download SRT, WebVTT, or plain text. Use **Batch ZIP** for a ZIP when two or more files finish.
 
-The browser edition uses [Transformers.js](https://huggingface.co/docs/transformers.js/) and quantized Whisper weights. Auto compute tries WebGPU when available and falls back to CPU/WASM. The first run downloads the runtime and model weights to your browser. Your media is decoded and transcribed on your device and is not uploaded.
+The browser edition uses [Transformers.js](https://huggingface.co/docs/transformers.js/) and quantized Whisper weights. The default **Accurate** mode uses Whisper Small (about 255 MB, first download only), or its English-only build when you set Spoken language to English. **Quick** uses Whisper Base. **Max** uses Whisper Large v3 Turbo (about 570 MB) and requires WebGPU with FP16, without changing the selected quality if it cannot start. For the other modes, Auto compute tries WebGPU when available and falls back to CPU/WASM using the same model. Accurate and Max use word timing to break subtitles at pauses and punctuation when supported. The first run downloads the runtime and model weights to your browser. Your media is decoded and transcribed on your device and is not uploaded.
 
 Use a recent Chromium browser for the best compatibility. The web app supports formats your browser can decode, with WAV and MP3 as the recommended inputs. The queue holds up to 32 files, each up to 150 MiB and 25 minutes. Use the desktop edition for larger files or other formats.
 

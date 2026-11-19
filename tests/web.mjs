@@ -38,3 +38,40 @@ test("batch ZIP has unique Unicode paths and valid end record", async () => {
   assert.equal(view.getUint16(end + 10, true), files.length);
   assert.equal(view.getUint32(view.getUint32(end + 16, true), true), 0x02014b50);
 });
+
+test("word alignment creates separate timed cues at sentence ends, pauses and line limits", async () => {
+  const { wordCues } = await import("../docs/cue-words.mjs");
+  const words = [
+    { timestamp: [0.1, 0.31], text: " Welcome" },
+    { timestamp: [0.31, .75], text: " back." },
+    { timestamp: [.82, 1.03], text: " Here" },
+    { timestamp: [1.03, 1.41], text: " we go" },
+    { timestamp: [2.15, 2.4], text: " again" },
+    { timestamp: [2.4, 2.41], text: "!" },
+  ];
+  assert.deepEqual(wordCues(words, 3), [
+    { start: .1, end: .75, text: "Welcome back." },
+    { start: .82, end: 1.41, text: "Here we go" },
+    { start: 2.15, end: 2.41, text: "again!" },
+  ]);
+  const many = "The studio model should split this long sentence into readable phrases without losing words".split(" ");
+  const result = wordCues(many.map((text, i) => ({ text, timestamp: [i*.29, (i+1)*.29] })), 15);
+  assert.ok(result.length > 1);
+  assert.ok(result.every((cue) => cue.text.length <= 43));
+  assert.equal(result.map((cue) => cue.text).join(" "), many.join(" "));
+  const cjk = [{ text: "你好", timestamp:[0,.4]}, {text:"世界",timestamp:[.4,.8]}, {text:"。",timestamp:[.8,.9]}];
+  assert.equal(wordCues(cjk, 1)[0].text, "你好世界。");
+});
+
+test("digital silence is omitted but quiet speech and timing are preserved", async () => {
+  const { audioEnvelope, filterQuiet } = await import("../docs/cue-words.mjs");
+  const silence = new Float32Array(16000 * 3);
+  assert.equal(audioEnvelope(silence).audible, false);
+  const audio = silence.slice();
+  audio.fill(.004, 16000, 20000);
+  const env = audioEnvelope(audio);
+  assert.equal(env.audible, true);
+  const good = { start:.94, end:1.37, text:"Quiet words" };
+  assert.deepEqual(filterQuiet([{ start:0, end:.6, text:"made up" },good,
+    { start:2, end:2.7, text:"more hallucination" }], env), [good]);
+});
