@@ -80,18 +80,29 @@ function cleanupPreview() {
   if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = undefined; }
 }
 
-function renderCaptions(selected) {
-  if (current === selected?.id && previewCues === selected?.cues) return;
-  cleanupPreview();
+function reviewCue(cue, previous, next) {
+  const issues = [];
+  if (cue.end <= cue.start || cue.text.length / (cue.end - cue.start) > 20) issues.push("Fast reading speed");
+  if (cue.start < (previous?.end ?? 0) || cue.end > (next?.start ?? Infinity)) issues.push("Overlapping cue");
+  if (cue.text.split("\n").some((line) => line.length > 42)) issues.push("Line over 42 characters");
+  return issues;
+}
+
+function renderCaptions(selected, keepAudio = false) {
+  if (!keepAudio && current === selected?.id && previewCues === selected?.cues) return;
+  if (!keepAudio) cleanupPreview();
   current = selected?.id;
   previewCues = selected?.cues;
   $("captions").replaceChildren();
   if (!selected) return;
-  previewUrl = URL.createObjectURL(selected.file);
-  audio.src = previewUrl;
+  if (!keepAudio) {
+    previewUrl = URL.createObjectURL(selected.file);
+    audio.src = previewUrl;
+  }
   const { cues } = selected;
-  $("cue-count").textContent = cues.length + (cues.length === 1 ? " CUE" : " CUES");
-  $("captions").replaceChildren(...cues.map((cue) => {
+  const flagged = cues.filter((cue, i) => reviewCue(cue, cues[i - 1], cues[i + 1]).length).length;
+  $("cue-count").textContent = cues.length + (cues.length === 1 ? " CUE" : " CUES") + (flagged ? " · " + flagged + " TO REVIEW" : "");
+  $("captions").replaceChildren(...cues.map((cue, i) => {
     const at = element("button", "button ghost", stamp(cue.start).replace(/^00:/, ""));
     at.type = "button";
     at.setAttribute("aria-label", "Seek to " + stamp(cue.start));
@@ -106,7 +117,54 @@ function renderCaptions(selected) {
       audio.currentTime = cue.start;
     };
     const line = element("div", "caption");
-    line.append(at, element("span", "", cue.text));
+    const body = element("div", "");
+    const issues = reviewCue(cue, cues[i - 1], cues[i + 1]);
+    body.append(element("p", "", cue.text));
+    if (issues.length) body.append(element("small", "", issues.join(" · ")));
+    const editor = element("details", "");
+    editor.append(element("summary", "", "Edit cue " + (i + 1)));
+    const form = element("form", "");
+    const fields = {};
+    for (const [key, labelText] of [["start", "Start (seconds)"], ["end", "End (seconds)"], ["text", "Caption"]]) {
+      const label = element("label", "", labelText + " ");
+      const input = element(key === "text" ? "textarea" : "input", "");
+      input.required = true;
+      input.value = cue[key];
+      if (key !== "text") {
+        input.type = "number";
+        input.step = "any";
+        input.min = "0";
+      }
+      fields[key] = input;
+      label.append(input);
+      form.append(label, element("br", ""));
+    }
+    const save = element("button", "button ghost", "Save cue");
+    const feedback = element("small", "");
+    feedback.setAttribute("role", "status");
+    fields.end.oninput = () => fields.end.setCustomValidity("");
+    form.append(save, feedback);
+    form.onsubmit = (event) => {
+      event.preventDefault();
+      const start = fields.start.valueAsNumber;
+      const end = fields.end.valueAsNumber;
+      const text = fields.text.value.trim();
+      if (!text || !Number.isFinite(start) || !Number.isFinite(end) || end <= start ||
+          (Number.isFinite(audio.duration) && end > audio.duration) ||
+          start < (cues[i - 1]?.start ?? 0) || start > (cues[i + 1]?.start ?? Infinity)) {
+        feedback.textContent = " Enter text and valid timestamps in cue order.";
+        return;
+      }
+      Object.assign(cue, { start, end, text });
+      renderCaptions(selected, true);
+      const updated = $("captions").children[i].querySelector("details");
+      updated.open = true;
+      updated.querySelector("summary").focus();
+      say("Cue updated", "Exports will include your edits.");
+    };
+    editor.append(form);
+    body.append(editor);
+    line.append(at, body);
     return line;
   }));
 }
