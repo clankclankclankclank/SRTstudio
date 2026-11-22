@@ -68,6 +68,23 @@ async function loadModel(id, model, device) {
   return pipe;
 }
 
+function looksCorrupt(output) {
+  const text = output.text || (output.chunks ?? []).map(chunk => chunk.text).join(" ");
+  if ((text.match(/\uFFFD/gu) ?? []).length >= 3) return true;
+  const words = text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+  const passages = new Map();
+  for (let i = 0; i + 7 < words.length; i++) {
+    const passage = words.slice(i, i + 8).join(" ");
+    const starts = passages.get(passage) ?? { count: 0, last: -8 };
+    if (i - starts.last < 8) continue;
+    starts.last = i;
+    starts.count++;
+    if (starts.count >= 4) return true;
+    passages.set(passage, starts);
+  }
+  return false;
+}
+
 async function transcribe(job, device, envelope) {
   const { id, model, language, pcm } = job;
   const pack = SOURCES[model];
@@ -90,6 +107,14 @@ async function transcribe(job, device, envelope) {
     options.return_timestamps = true;
     publish(id, { type: "segment-only" });
     out = await pipe(pcm, options);
+  }
+  if (looksCorrupt(out) && options.return_timestamps === "word") {
+    options.return_timestamps = true;
+    publish(id, { type: "segment-only" });
+    out = await pipe(pcm, options);
+  }
+  if (looksCorrupt(out)) {
+    throw new Error("Whisper returned repeated or corrupted text. Try a different quality or set the spoken language explicitly.");
   }
   const duration = pcm.length / SAMPLE_RATE;
   const cues = options.return_timestamps === "word" ?

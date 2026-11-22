@@ -290,9 +290,9 @@ $("sample").onclick = async () => {
   addingSample = true;
   render();
   try {
-    const r = await fetch(new URL("./assets/sample.mp3", import.meta.url));
+    const r = await fetch(new URL("./assets/sample-intro.m4a", import.meta.url));
     if (!r.ok) throw new Error("Sample audio is unavailable. You can still add your own files.");
-    const file = new File([await r.blob()], "srt-studio-sample.mp3", { type: "audio/mpeg", lastModified: 0 });
+    const file = new File([await r.blob()], "srt-studio-sample.m4a", { type: "audio/mp4", lastModified: 0 });
     const added = addFiles([file]);
     if (!added && !active && queue.some((item) => item.file.name === file.name && item.file.lastModified === 0)) {
       say("Sample already added", "Remove it from the queue to run it again.");
@@ -326,7 +326,7 @@ function terminateWorker(reason) {
 }
 
 function createWorker() {
-  const w = new Worker(new URL("./engine.v3.mjs", import.meta.url), { type: "module" });
+  const w = new Worker(new URL("./engine.v3.mjs?rev=4", import.meta.url), { type: "module" });
   w.onmessage = ({ data }) => {
     if (w !== worker || !pending || pending.id !== data.id) return;
     if (data.type === "done" || data.type === "error") {
@@ -406,7 +406,10 @@ $("start").onclick = async () => {
         item.note = "Preparing Whisper";
         render();
         say("Preparing Whisper", item.file.name, null);
-        const result = await askWorker(item.id, pcm, options, (ev) => {
+        const useSampleSettings = item.file.name === "srt-studio-sample.m4a" &&
+          item.file.lastModified === 0 && options.model === "accurate" && !options.language;
+        const runOptions = useSampleSettings ? {...options, model: "english", device: "wasm"} : options;
+        const result = await askWorker(item.id, pcm, runOptions, (ev) => {
           if (isCancelled()) return;
           if (ev.type === "download") say("Downloading " + modeName(ev.model) + " model", mb(ev.read) + " / " + mb(ev.total) + " · first run", ev.read / ev.total);
           if (ev.type === "load") say("Preparing " + modeName(ev.model) + " · " + deviceName(ev.device), modelHint(), null);
