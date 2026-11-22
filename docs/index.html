@@ -2,15 +2,93 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Turn audio into SRT subtitles in your browser. SRT Studio runs Whisper on your device, with no audio uploads.">
-  <meta name="theme-color" content="#101211">
-  <title>SRT Studio — Online subtitle workbench</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Transcribe audio locally with Whisper and export timed captions in SRT, WebVTT, or plain text.">
+  <meta name="theme-color" content="#f6f7f2">
+  <title>SRT Studio</title>
   <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./workbench.v2.css">
-  <link rel="stylesheet" href="./release.css">
-  <link rel="stylesheet" href="./github-buttons.css">
-  <script defer src="./github-buttons.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f6f7f2;
+      --panel: #fff;
+      --ink: #1c2520;
+      --muted: #526157;
+      --line: #d8dfd6;
+      --accent: #275742;
+      --soft: #edf4ee;
+      font: 16px/1.5 system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--page);
+    }
+    * { box-sizing: border-box; }
+    [hidden], .sprite { display: none !important; }
+    body { margin: 0; }
+    a { color: var(--accent); text-underline-offset: .18em; }
+    button, select, input, textarea { font: inherit; color: inherit; }
+    :focus-visible { outline: 3px solid #54866a; outline-offset: 3px; }
+    button, summary { cursor: pointer; }
+    button:disabled { cursor: default; opacity: .52; }
+    .wrap { width: min(100% - 2rem, 67rem); margin: auto; }
+    .top { border-bottom: 1px solid var(--line); }
+    .top-inner, .panel-heading, .run-actions, .exports {
+      display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+    }
+    .top-inner, .panel-heading { justify-content: space-between; }
+    .top-inner { min-height: 4rem; }
+    .brand { display: inline-flex; align-items: center; gap: .55rem; text-decoration: none; font-weight: 700; }
+    nav { display: flex; gap: 1rem; font-size: .9rem; }
+    .intro { padding: clamp(1.5rem, 5vw, 3.25rem) 0 1.5rem; }
+    h1, h2, p { margin: 0; }
+    h1 { font-size: clamp(2rem, 5vw, 3.35rem); font-weight: 650; letter-spacing: -.05em; line-height: 1.1; }
+    h2 { font-size: 1.125rem; }
+    .intro p { margin-top: .55rem; }
+    .muted, small { color: var(--muted); }
+    .workbench { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 5fr); gap: 1rem; align-items: start; }
+    .panel { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 1rem; padding: clamp(.95rem, 2.6vw, 1.4rem); }
+    .panel-heading { margin-bottom: .8rem; }
+    #counter { margin-left: .25rem; font-weight: 400; font-size: .875rem; color: var(--muted); }
+    .drop-zone { border: 1px dashed #899e8f; border-radius: .75rem; padding: 1.1rem 1rem; display: grid; justify-items: center; gap: .55rem; text-align: center; background: var(--soft); }
+    .drop-zone.is-drag { outline: 2px solid var(--accent); }
+    .signal { width: 4rem; height: 1.35rem; color: var(--accent); }
+    .signal path, .icon { stroke: currentColor; fill: none; }
+    .icon { width: 1rem; height: 1rem; flex: none; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: .3rem; min-height: 2.35rem; padding: .36rem .7rem; border: 1px solid var(--line); border-radius: .55rem; background: #fff; text-decoration: none; font-size: .875rem; }
+    .button:hover:not(:disabled) { background: var(--soft); }
+    .button.primary { background: var(--accent); border-color: var(--accent); color: white; }
+    .button.primary:hover:not(:disabled) { background: #194633; }
+    .button.ghost { border-color: transparent; color: var(--accent); background: transparent; }
+    .queue { list-style: none; padding: 0; margin: .65rem 0; }
+    .queue li { display: flex; align-items: center; gap: .45rem; padding: .55rem 0; border-bottom: 1px solid var(--line); }
+    .file-title { display: grid; flex: 1 1 0; min-width: 0; overflow-wrap: anywhere; }
+    .badge { font-size: .75rem; color: var(--muted); }
+    .queue .remove { min-width: 2rem; padding: .2rem; }
+    .settings { margin: .75rem 0; border-top: 1px solid var(--line); padding-top: .65rem; }
+    summary { color: var(--accent); font-size: .9rem; }
+    .options { display: grid; gap: .55rem; margin-block: .65rem; }
+    label { display: grid; gap: .22rem; font-size: .875rem; }
+    select, input:not([type=file]), textarea { width: 100%; min-width: 0; padding: .35rem .45rem; border: 1px solid var(--line); border-radius: .4rem; background: #fff; }
+    .transport { display: grid; gap: .65rem; padding-top: .6rem; }
+    .run-copy { display: grid; }
+    progress { width: 100%; accent-color: var(--accent); }
+    .notice { padding: .65rem; margin-bottom: .65rem; background: #fff3e8; color: #783918; border-radius: .45rem; }
+    .empty { min-height: 10rem; display: grid; gap: .2rem; align-content: center; justify-items: center; text-align: center; padding: .8rem; border: 1px solid var(--line); border-radius: .7rem; background: var(--page); }
+    .result-content { display: grid; gap: .75rem; }
+    audio { width: 100%; }
+    .caption-header { color: var(--muted); font-size: .875rem; }
+    .captions { max-height: 28rem; overflow: auto; border-block: 1px solid var(--line); }
+    .caption { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: .55rem; padding: .6rem .2rem; }
+    .caption + .caption { border-top: 1px solid var(--line); }
+    .caption p { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .caption small { display: block; color: #783918; }
+    .caption form { display: grid; gap: .35rem; padding: .4rem 0; }
+    .caption form br { display: none; }
+    .caption details { margin-top: .25rem; }
+    footer { padding: 1.25rem 0 2rem; font-size: .9rem; }
+    .skip { position: absolute; transform: translateY(-200%); }
+    .skip:focus { transform: none; background: white; z-index: 1; }
+    @media (max-width: 43rem) { .workbench { grid-template-columns: minmax(0, 1fr); } }
+  </style>
   <script type="module" src="./workbench.v3.js"></script>
 </head>
 <body>
@@ -28,90 +106,83 @@
   <a class="skip" href="#workbench">Skip to workbench</a>
   <header class="top">
     <div class="wrap top-inner">
-      <a class="brand" href="./" aria-label="SRT Studio home"><img src="./assets/mark.svg" width="34" height="34" alt=""><span>SRT Studio<small>SUBTITLE WORKBENCH</small></span></a>
-      <nav class="repo-nav" aria-label="Main navigation">
-        <a class="download-nav" href="#desktop">Download</a>
-        <a class="repo-button repo-source" href="https://github.com/clankclankclankclank/SRTstudio" target="_blank" rel="noopener noreferrer" aria-label="View SRT Studio on GitHub"><img src="./assets/github/github-mark-white.png" alt="" width="16" height="16"><span class="repo-source-label">GitHub</span></a>
-        <a class="repo-button repo-star" href="https://github.com/clankclankclankclank/SRTstudio" target="_blank" rel="noopener noreferrer" aria-label="Star SRT Studio on GitHub"><span class="repo-star-icon"><img src="./assets/github/github-star.png" alt="" width="16" height="16"></span><span>Star<span class="repo-star-label-extra"> on GitHub</span></span><span class="repo-count" data-star-count aria-hidden="true" hidden></span></a>
+      <a class="brand" href="./"><img src="./assets/mark.svg" width="28" height="28" alt="">SRT Studio</a>
+      <nav aria-label="Main navigation">
+        <a href="./downloads/SRT-Studio-0.1.0-Windows.zip" download>Windows app</a>
+        <a href="https://github.com/clankclankclankclank/SRTstudio">GitHub</a>
       </nav>
     </div>
   </header>
-  <main id="main" class="wrap">
-    <section class="hero" aria-labelledby="intro">
-      <div class="hero-copy">
-        <div class="eyebrow"><i class="signal-dot"></i> BROWSER EDITION</div>
-        <h1 id="intro">Your audio. <em>In captions.</em></h1>
-        <p>Generate subtitles in your browser. No audio uploads.</p>
-      </div>
-      <div class="scope" aria-hidden="true">
-        <div class="scope-label"><span>ON-DEVICE ENGINE</span><span>SRT / VTT / TXT</span></div>
-        <svg class="hero-signal" viewBox="0 0 400 100" focusable="false">
-          <defs><linearGradient id="signal-grad"><stop stop-color="#647350"/><stop offset=".60" stop-color="#dafa87"/><stop offset="1" stop-color="#819057"/></linearGradient></defs>
-          <path id="signal-bars" d="M0 50H400" fill="none" stroke="url(#signal-grad)" stroke-linecap="round" stroke-width="2"/>
-        </svg>
-      </div>
-    </section>
-    <noscript><p class="notice standalone">Enable JavaScript to use SRT Studio. You can also use the <a href="#desktop">desktop edition</a>.</p></noscript>
+  <main class="wrap">
+    <header class="intro">
+      <h1>Transcribe audio</h1>
+      <p class="muted">Create timed captions with Whisper. Your audio stays on this device.</p>
+    </header>
+    <noscript><p class="notice">Enable JavaScript to transcribe audio in your browser.</p></noscript>
     <div id="boot-notice" class="notice standalone" role="status" hidden>The workbench couldn’t start. Reload the page to refresh its files, or try a current version of Chrome or Edge.</div>
     <section class="workbench" id="workbench" aria-label="Transcription workspace">
-      <div class="panel queue-panel">
-        <header class="panel-head">
-          <div class="panel-title"><div class="panel-mark"><svg class="icon" aria-hidden="true"><use href="#i-wave"/></svg></div><div><span class="kicker">INPUT</span><h2>Media queue <span class="counter" id="counter">0</span></h2></div></div>
-          <button type="button" class="button ghost" id="clear-queue" disabled><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg> Clear <span class="wide">queue</span></button>
+      <section class="panel" aria-labelledby="audio-title">
+        <header class="panel-heading">
+          <h2 id="audio-title">Audio files <span id="counter">0</span></h2>
+          <button type="button" class="button ghost" id="clear-queue" disabled>Clear queue</button>
         </header>
         <div id="drop-zone" class="drop-zone">
-          <div class="upload-icon"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg></div>
-          <div class="drop-copy"><strong>Drop audio files here</strong><small>WAV, MP3, M4A, FLAC and more</small></div>
-          <button type="button" class="button add-button" id="browse" disabled>Browse files</button>
+          <svg class="signal" viewBox="0 0 400 100" aria-hidden="true"><path id="signal-bars" stroke-width="4"></path></svg>
+          <strong>Drop audio files here</strong>
+          <button type="button" class="button" id="browse" disabled>Browse files</button>
           <input type="file" id="media-files" accept="audio/*,.wav,.mp3,.m4a,.aac,.flac,.ogg,.opus,.webm,.mp4" multiple hidden>
         </div>
-        <div class="queue-footer"><span>Only formats your browser can decode</span><button type="button" class="button ghost" id="sample" disabled><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Try with sample audio</button></div>
+        <button type="button" class="button ghost" id="sample" disabled>Try sample audio</button>
         <ul class="queue" id="queue" aria-label="Queued media"></ul>
-        <div class="options">
+        <details class="settings">
+          <summary>Transcription settings</summary>
+          <div class="options">
           <label>Quality<select id="model"><option value="accurate" selected>Accurate · ~255 MB</option><option value="max">Max · ~570 MB · WebGPU</option><option value="quick">Quick · ~80 MB</option></select></label>
           <label>Spoken language<select id="language"><option value="">Auto-detect</option><option value="en">English</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="zh">Chinese</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="pt">Portuguese</option><option value="it">Italian</option><option value="hi">Hindi</option><option value="ar">Arabic</option><option value="ru">Russian</option></select></label>
           <label>Compute<select id="device"><option value="auto">Auto · prefer WebGPU</option><option value="wasm">CPU · compatibility mode</option></select></label>
         </div>
+        </details>
         <div id="notice" class="notice" role="alert" hidden></div>
         <div class="transport">
-          <div class="run-copy"><i class="signal-dot" aria-hidden="true"></i><div><strong id="status" role="status">Ready to transcribe</strong><small id="detail">Accurate uses Whisper Small. First download is about 255 MB.</small></div></div>
-          <div class="run-actions"><button type="button" id="cancel" class="button secondary" hidden><svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg> Stop</button><button type="button" id="start" class="button primary" disabled><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> <span id="start-label">Transcribe</span></button></div>
+          <div class="run-actions">
+            <button type="button" id="start" class="button primary" disabled><span id="start-label">Transcribe</span></button>
+            <button type="button" id="cancel" class="button" hidden>Stop</button>
+          </div>
+          <div class="run-copy">
+            <strong id="status" role="status">Ready to transcribe</strong>
+            <small id="detail">Whisper Small downloads on first use, about 255 MB.</small>
+          </div>
+          <progress id="progress" aria-label="Model or batch progress" hidden></progress>
         </div>
-        <progress id="progress" aria-label="Model or batch progress" hidden></progress>
-      </div>
-      <div class="panel result-panel">
-        <header class="panel-head">
-          <div class="panel-title"><div class="panel-mark"><svg class="icon" aria-hidden="true"><use href="#i-caption"/></svg></div><div><span class="kicker">OUTPUT</span><h2>Subtitles</h2></div></div>
-          <button type="button" class="button secondary" id="zip" hidden><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg> Batch ZIP</button>
+      </section>
+      <section class="panel" aria-labelledby="captions-title">
+        <header class="panel-heading">
+          <h2 id="captions-title">Captions</h2>
+          <button type="button" class="button" id="zip" hidden>Batch ZIP</button>
         </header>
-        <div class="empty" id="result-empty">
-          <div class="empty-mark"><svg class="icon" aria-hidden="true"><use href="#i-caption"/></svg></div>
-          <strong>No captions yet</strong><small>Add a file and hit Transcribe.<br>Your timed captions will show up here.</small>
-          <div class="format-tags" aria-hidden="true"><span>SRT</span><span>VTT</span><span>TXT</span></div>
+        <div id="result-empty" class="empty">
+          <strong>No captions yet</strong>
+          <small>Add an audio file and select Transcribe.</small>
         </div>
         <div class="result-content" id="result-content" hidden>
-          <label class="result-label">Output file<select id="output-file" aria-label="Select a transcribed file"></select></label>
+          <label>Transcribed file<select id="output-file"></select></label>
           <audio id="audio" controls preload="metadata" aria-label="Play the original audio"></audio>
-          <div class="caption-header"><span id="cue-count"></span><span>SELECT A TIMESTAMP TO SEEK</span></div>
+          <div class="caption-header" id="cue-count"></div>
           <div class="captions" id="captions" aria-label="Transcribed cues"></div>
-          <div class="exports"><button type="button" class="button primary" data-format="srt"><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg> Download SRT</button><button type="button" class="button secondary" data-format="vtt"><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg> VTT</button><button type="button" class="button secondary" data-format="txt"><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg> TXT</button></div>
+          <div class="exports">
+            <button type="button" class="button primary" data-format="srt">Download SRT</button>
+            <button type="button" class="button" data-format="vtt">WebVTT</button>
+            <button type="button" class="button" data-format="txt">Text</button>
+          </div>
         </div>
-      </div>
+      </section>
     </section>
-    <section class="desktop download-panel" id="desktop" aria-labelledby="desktop-title">
-      <div class="download-top">
-        <div class="desktop-copy"><span class="kicker">DESKTOP EDITION · V0.1.0</span><h2 id="desktop-title">SRT Studio for Windows</h2><p>Transcribe larger batches with CUDA or CPU. Prepare a model once, then generate subtitles on your PC without internet.</p></div>
-        <div class="download-action"><a class="button primary" href="./downloads/SRT-Studio-0.1.0-Windows.zip" download><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg> Download for Windows</a><p>WINDOWS X64 · ZIP</p></div>
-      </div>
-      <ol class="desktop-steps"><li><strong>Extract the ZIP</strong>Install Python and FFmpeg if you don’t have them.</li><li><strong>Set up once, online</strong>Run Install-SRT-Studio.cmd and prepare Turbo or Small.</li><li><strong>Run locally or offline</strong>Open Start-SRT-Studio.cmd. Your audio stays on your PC.</li></ol>
-      <div class="release-meta"><span>The ZIP is source-based. Dependencies and model weights download separately.</span><div><a href="./downloads/SRT-Studio-0.1.0-Windows.sha256">SHA-256</a><a href="https://github.com/clankclankclankclank/SRTstudio/releases">GitHub Releases</a></div></div>
-    </section>
+    <footer class="muted"><a href="https://github.com/clankclankclankclank/SRTstudio/releases">Desktop releases and setup</a></footer>
   </main>
-  <footer class="floor wrap"><a class="brand" href="./"><img src="./assets/mark.svg" width="22" height="22" alt=""><span>SRT Studio</span></a><span>MEDIA STAYS ON YOUR DEVICE</span><div class="footer-repo"><a class="repo-button repo-star" href="https://github.com/clankclankclankclank/SRTstudio" target="_blank" rel="noopener noreferrer" aria-label="Star SRT Studio on GitHub"><span class="repo-star-icon"><img src="./assets/github/github-star.png" alt="" width="16" height="16"></span><span>Star<span class="repo-star-label-extra"> on GitHub</span></span><span class="repo-count" data-star-count aria-hidden="true" hidden></span></a></div></footer>
   <script>
     window.addEventListener("load", () => {
       if (!document.documentElement.dataset.ready) document.getElementById("boot-notice").hidden = false;
-    }, { once: true });
+    }, {once: true});
   </script>
 </body>
 </html>
