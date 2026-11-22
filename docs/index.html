@@ -6,7 +6,7 @@
   <meta name="description" content="Transcribe audio locally with Whisper and export timed captions in SRT, WebVTT, or plain text.">
   <meta name="theme-color" content="#f6f7f2">
   <title>SRT Studio</title>
-  <link rel="icon" href="./assets/studio-mark.png" type="image/png">
+  <link rel="icon" href="./assets/studio-mark.png?v=2" type="image/png">
   <style>
     :root {
       color-scheme: light;
@@ -94,19 +94,6 @@
     @media (max-width: 43rem) { .workbench { grid-template-columns: minmax(0, 1fr); } }
   </style>
   <script type="module" src="./workbench.v3.js?rev=4"></script>
-  <style>
-    .project-brand-heading { display: flex; align-items: center; gap: .35em; }
-    .project-brand-mark {
-      display: inline-block;
-      flex: none;
-      width: 1.9rem;
-      height: 1.9rem;
-      background: #31845e;
-      -webkit-mask: url("./assets/studio-mark.png") center / contain no-repeat;
-      mask: url("./assets/studio-mark.png") center / contain no-repeat;
-    }
-    @media (forced-colors: active) { .project-brand-mark { background: CanvasText; forced-color-adjust: none; } }
-  </style>
 </head>
 <body>
   <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -123,7 +110,7 @@
   <a class="skip" href="#workbench">Skip to workbench</a>
   <header class="top">
     <div class="wrap top-inner">
-      <a class="brand" href="./"><span class="project-brand-mark" aria-hidden="true"></span>SRT Studio</a>
+      <a class="brand" href="./">SRT Studio</a>
       <nav aria-label="Main navigation">
         <a href="#desktop">Windows app</a>
         <a href="https://github.com/clankclankclankclank/SRTstudio">GitHub</a>
