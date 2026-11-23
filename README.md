@@ -1,6 +1,22 @@
-# SRT Studio
+<p align="center"><img src="docs/assets/studio-mark.png" alt="SRT Studio logo" width="88"></p>
+<h1 align="center">SRT Studio</h1>
+<p align="center">Local audio transcription and subtitle editing with Whisper and GPU acceleration.</p>
+<p align="center"><a href="https://clankclankclankclank.github.io/SRTstudio/"><strong>Open SRT Studio</strong></a></p>
 
-**Your audio. In captions.** A subtitle workbench for creators who process voiceovers in batches.
+## What you can do
+
+- Transcribe audio locally with Whisper Base, Small, or Large v3 Turbo.
+- Review timed captions alongside the original audio and edit their text and timestamps.
+- Export SRT, WebVTT, or plain text, and download completed batches as a ZIP.
+- Use the browser edition with WebGPU or CPU, or the Windows edition with NVIDIA CUDA.
+
+## Try it in a minute
+
+Open the app, choose **Try sample audio**, and select **Transcribe**. When the captions appear, click a timestamp to replay that moment, review the text, and download an SRT file.
+
+## Privacy
+
+Audio is decoded and transcribed on your device. The first run needs internet access to download the runtime and model weights. The browser can cache those downloads for later use.
 
 ## Browser edition
 
