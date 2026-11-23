@@ -65,3 +65,37 @@
   }
   @keyframes pipeline-sweep { to { --pipeline-sweep: 360deg; } }
 }
+
+@media (min-width:761px) {
+  .pipeline { --output-gap: .65rem; }
+  .pipeline-outputs { grid-auto-rows: 1fr; gap: var(--output-gap); }
+  .pipeline-branch {
+    position: relative;
+    align-self: stretch;
+    --branch-color: var(--wire);
+  }
+  .pipeline-branch[data-lit] { --branch-color: var(--signal); }
+  .pipeline-branch::before {
+    content: "";
+    position: absolute;
+    inset: calc(50% - 1px) 55% auto 0;
+    height: 2px;
+    background: var(--branch-color);
+    transition: background-color .35s;
+  }
+  .pipeline-branch i {
+    position: absolute;
+    left: calc(45% - 1px);
+    right: 0;
+    height: auto;
+    border-color: var(--branch-color);
+  }
+  .pipeline-branch i:first-child {
+    top: calc(25% - var(--output-gap) / 4 - 1px);
+    bottom: 50%;
+  }
+  .pipeline-branch i:last-child {
+    top: 50%;
+    bottom: calc(25% - var(--output-gap) / 4 - 1px);
+  }
+}
