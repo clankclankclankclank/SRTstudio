@@ -40,3 +40,28 @@
   .pipeline-branch[data-lit] { background:var(--signal); }
 }
 @media(prefers-reduced-motion:reduce) { .pipeline *,.pipeline-link::after { transition:none; } }
+
+@property --pipeline-sweep {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.pipeline-node { position: relative; }
+.pipeline-node > span { position: relative; }
+.pipeline-node[data-state="done"] > span::after {
+  content: "✓"; position: absolute; right: -.25rem; bottom: -.25rem;
+  display: grid; place-items: center; width: .95rem; height: .95rem;
+  border: 1px solid var(--panel); border-radius: 50%;
+  background: var(--accent); color: white; font-size: .65rem;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pipeline-node[data-state="active"]::after {
+    content: ""; position: absolute; inset: -1px; padding: 2px;
+    border-radius: inherit; pointer-events: none;
+    background: conic-gradient(from var(--pipeline-sweep), transparent 67%, var(--accent) 94%, transparent);
+    mask: linear-gradient(white 0 0) content-box, linear-gradient(white 0 0);
+    mask-composite: exclude;
+    animation: pipeline-sweep 1.15s linear infinite;
+  }
+  @keyframes pipeline-sweep { to { --pipeline-sweep: 360deg; } }
+}
