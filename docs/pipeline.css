@@ -99,3 +99,8 @@
     bottom: calc(25% - var(--output-gap) / 4 - 1px);
   }
 }
+
+/* Keep each card sized for every status, including wrapped text. */
+.pipeline-status { display: grid; }
+.pipeline-status > small { grid-area: 1 / 1; }
+.pipeline-status > small[aria-hidden="true"] { visibility: hidden; }

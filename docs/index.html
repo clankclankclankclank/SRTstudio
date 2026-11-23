@@ -103,7 +103,7 @@
     @media (max-width: 43rem) { .workbench { grid-template-columns: minmax(0, 1fr); } }
   </style>
   <script type="module" src="./workbench.v3.js?rev=6"></script>
-  <link rel="stylesheet" href="pipeline.css?v=4">
+  <link rel="stylesheet" href="pipeline.css?v=5">
   <script defer src="pipeline.js?v=3"></script>
 </head>
 <body>
@@ -239,15 +239,15 @@
         <button type="button" class="button" id="pipeline-replay">Replay workflow</button>
       </div>
       <div class="pipeline" id="desktop-pipeline">
-        <div class="pipeline-node" data-node="0"><span aria-hidden="true">♪</span><div><strong>Add audio</strong><small data-running="Reading audio files…" data-done="voiceover.wav queued">Files or a folder</small></div></div>
+        <div class="pipeline-node" data-node="0"><span aria-hidden="true">♪</span><div><strong>Add audio</strong><div class="pipeline-status"><small data-running="Reading audio files…" data-done="voiceover.wav queued">Files or a folder</small><small aria-hidden="true">Files or a folder</small><small aria-hidden="true">Reading audio files…</small><small aria-hidden="true">voiceover.wav queued</small></div></div></div>
         <div class="pipeline-link" data-link="0" aria-hidden="true"></div>
-        <div class="pipeline-node" data-node="1"><span aria-hidden="true">▣</span><div><strong>Load model</strong><small data-running="Loading Whisper Turbo…" data-done="Whisper Turbo ready">Whisper Small or Turbo</small></div></div>
+        <div class="pipeline-node" data-node="1"><span aria-hidden="true">▣</span><div><strong>Load model</strong><div class="pipeline-status"><small data-running="Loading Whisper Turbo…" data-done="Whisper Turbo ready">Whisper Small or Turbo</small><small aria-hidden="true">Whisper Small or Turbo</small><small aria-hidden="true">Loading Whisper Turbo…</small><small aria-hidden="true">Whisper Turbo ready</small></div></div></div>
         <div class="pipeline-link" data-link="1" aria-hidden="true"></div>
-        <div class="pipeline-node" data-node="2"><span aria-hidden="true">⚡</span><div><strong>Transcribe</strong><small data-running="Running on NVIDIA CUDA…" data-done="Timed captions created">NVIDIA CUDA or CPU</small></div></div>
+        <div class="pipeline-node" data-node="2"><span aria-hidden="true">⚡</span><div><strong>Transcribe</strong><div class="pipeline-status"><small data-running="Running on NVIDIA CUDA…" data-done="Timed captions created">NVIDIA CUDA or CPU</small><small aria-hidden="true">NVIDIA CUDA or CPU</small><small aria-hidden="true">Running on NVIDIA CUDA…</small><small aria-hidden="true">Timed captions created</small></div></div></div>
         <div class="pipeline-branch" data-link="2" aria-hidden="true"><i></i><i></i></div>
         <div class="pipeline-outputs">
-          <div class="pipeline-node" data-node="3"><span aria-hidden="true">✓</span><div><strong>Review captions</strong><small data-running="Preparing timed captions…" data-done="Captions ready to review">Check text and timing</small></div></div>
-          <div class="pipeline-node" data-node="3"><span aria-hidden="true">↓</span><div><strong>Export subtitles</strong><small data-running="Writing subtitle files…" data-done="SRT · WebVTT · TXT ready">SRT, WebVTT, or text</small></div></div>
+          <div class="pipeline-node" data-node="3"><span aria-hidden="true">✓</span><div><strong>Review captions</strong><div class="pipeline-status"><small data-running="Preparing timed captions…" data-done="Captions ready to review">Check text and timing</small><small aria-hidden="true">Check text and timing</small><small aria-hidden="true">Preparing timed captions…</small><small aria-hidden="true">Captions ready to review</small></div></div></div>
+          <div class="pipeline-node" data-node="3"><span aria-hidden="true">↓</span><div><strong>Export subtitles</strong><div class="pipeline-status"><small data-running="Writing subtitle files…" data-done="SRT · WebVTT · TXT ready">SRT, WebVTT, or text</small><small aria-hidden="true">SRT, WebVTT, or text</small><small aria-hidden="true">Writing subtitle files…</small><small aria-hidden="true">SRT · WebVTT · TXT ready</small></div></div></div>
         </div>
       </div>
       <p class="muted">Example run with Whisper Turbo on NVIDIA CUDA. Choose Small for a lighter model or CPU for a system without CUDA. Once the model is cached, you can transcribe offline.</p>
