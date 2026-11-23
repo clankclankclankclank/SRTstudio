@@ -18,7 +18,7 @@ const AudioDecoder = window.OfflineAudioContext || window.webkitOfflineAudioCont
 const supported = Boolean(AudioDecoder && window.Worker && window.WebAssembly);
 const queue = [];
 let serial = 0, active, worker, pending, current, previewUrl, previewCues;
-let addingSample = false;
+let addingSample = false, replayEnd;
 const drop = $("drop-zone"), audio = $("audio");
 const output = $("output-file");
 
@@ -74,7 +74,75 @@ function drawWave() {
 }
 drawWave();
 
+function waveformPeaks(pcm) {
+  const peaks = new Float32Array(256);
+  for (let i = 0; i < pcm.length; i++) {
+    const bin = Math.floor(i * peaks.length / pcm.length);
+    peaks[bin] = Math.max(peaks[bin], Math.abs(pcm[i]));
+  }
+  return peaks;
+}
+
+function drawTimeline() {
+  const item = queue.find(entry => entry.id === current);
+  const canvas = $("cue-wave");
+  const {width, height} = canvas.getBoundingClientRect();
+  if (!width || !height) return;
+  const scale = window.devicePixelRatio || 1;
+  canvas.width = Math.round(width * scale);
+  canvas.height = Math.round(height * scale);
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+  const duration = audio.duration;
+  const peaks = item?.peaks;
+  const theme = getComputedStyle(document.documentElement);
+  if (peaks) {
+    ctx.fillStyle = theme.getPropertyValue("--muted").trim();
+    const gap = width / peaks.length;
+    peaks.forEach((peak, i) => {
+      const amp = Math.max(1, peak * height * .4);
+      ctx.fillRect(i * gap, height / 2 - amp, Math.max(1, gap * .7), amp * 2);
+    });
+  }
+  if (!Number.isFinite(duration) || duration <= 0) return;
+  ctx.fillStyle = theme.getPropertyValue("--accent").trim() || "#5269cc";
+  for (const cue of item?.cues ?? []) {
+    ctx.fillRect(cue.start / duration * width, height - 4, (cue.end - cue.start) / duration * width, 3);
+  }
+  ctx.fillRect(audio.currentTime / duration * width, 0, 2, height);
+}
+
+function seekTimeline(seconds) {
+  if (!Number.isFinite(audio.duration)) return;
+  replayEnd = undefined;
+  audio.currentTime = Math.max(0, Math.min(audio.duration, seconds));
+  syncTimeline();
+}
+
+function syncTimeline() {
+  const slider = $("cue-seek");
+  slider.disabled = !Number.isFinite(audio.duration);
+  slider.max = slider.disabled ? 0 : audio.duration;
+  if (replayEnd != null && audio.currentTime >= replayEnd) {
+    audio.pause();
+    replayEnd = undefined;
+  }
+  slider.value = audio.currentTime;
+  slider.setAttribute("aria-valuetext", stamp(audio.currentTime));
+  drawTimeline();
+  renderStyledCaption();
+}
+
+$("cue-seek").oninput = event => seekTimeline(event.currentTarget.valueAsNumber);
+$("cue-wave").onclick = event => {
+  const bounds = event.currentTarget.getBoundingClientRect();
+  if (bounds.width) seekTimeline(audio.duration * (event.clientX - bounds.left) / bounds.width);
+};
+for (const event of ["loadedmetadata", "timeupdate", "emptied"]) audio.addEventListener(event, syncTimeline);
+new ResizeObserver(drawTimeline).observe($("cue-wave"));
+
 function cleanupPreview() {
+  replayEnd = undefined;
   audio.pause();
   audio.removeAttribute("src");
   if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = undefined; }
@@ -87,6 +155,54 @@ function reviewCue(cue, previous, next) {
   if (cue.text.split("\n").some((line) => line.length > 42)) issues.push("Line over 42 characters");
   return issues;
 }
+
+function selectedOutput() {
+  return queue.find(item => item.id === current);
+}
+
+function renderStyledCaption() {
+  const controls = $("style-form").elements;
+  const overlay = $("caption-overlay");
+  const cues = selectedOutput()?.cues ?? [];
+  overlay.textContent = cues.find(cue => audio.currentTime >= cue.start && audio.currentTime < cue.end)?.text
+    ?? (audio.paused ? cues[0]?.text ?? "" : "");
+  overlay.style.fontFamily = controls.font.value;
+  overlay.style.fontSize = controls.size.value + "px";
+  overlay.style.top = controls.placement.value === "top" ? "10%" : controls.placement.value === "center" ? "50%" : "";
+  overlay.style.bottom = controls.placement.value === "bottom" ? "10%" : "";
+  overlay.style.transform = controls.placement.value === "center" ? "translateY(-50%)" : "";
+  $("caption-safe").hidden = !controls.safe.checked;
+}
+
+$("style-form").oninput = renderStyledCaption;
+$("sync-form").onsubmit = event => {
+  event.preventDefault();
+  const item = selectedOutput();
+  if (!item?.cues?.length) return;
+  const {offset, scale} = event.currentTarget.elements;
+  const delay = offset.valueAsNumber;
+  const multiplier = scale.valueAsNumber / 100;
+  const adjust = time => Math.round((time * multiplier + delay) * 1000) / 1000;
+  const next = item.cues.map(cue => ({...cue, start:adjust(cue.start), end:adjust(cue.end)}));
+  if (!Number.isFinite(delay) || !Number.isFinite(multiplier) ||
+      next.some(cue => cue.start < 0 || cue.end <= cue.start || !Number.isFinite(cue.end))) {
+    $("sync-status").textContent = "Choose a delay and scale that keep every cue at zero or later with a positive duration.";
+    return;
+  }
+  item.cues = next;
+  renderCaptions(item, true);
+  $("sync-status").textContent = Number.isFinite(audio.duration) && next.at(-1).end > audio.duration
+    ? "Timing updated. The last cue extends past the reference audio." : "Timing updated.";
+};
+
+function renderExportPreview() {
+  const cues = queue.find(item => item.id === current)?.cues ?? [];
+  const flagged = cues.map((cue, i) => reviewCue(cue, cues[i - 1], cues[i + 1])).filter(issues => issues.length);
+  $("export-review").textContent = flagged.length ? flagged.length + " cues flagged for review. Exports are still available." : "No timing or readability flags.";
+  $("export-content").textContent = $("export-preview").open ? serialize(cues, $("preview-format").value) : "";
+}
+$("preview-format").onchange = renderExportPreview;
+$("export-preview").ontoggle = renderExportPreview;
 
 function renderCaptions(selected, keepAudio = false) {
   if (!keepAudio && current === selected?.id && previewCues === selected?.cues) return;
@@ -107,6 +223,7 @@ function renderCaptions(selected, keepAudio = false) {
     at.type = "button";
     at.setAttribute("aria-label", "Seek to " + stamp(cue.start));
     at.onclick = () => {
+      replayEnd = undefined;
       if (!Number.isFinite(audio.duration)) {
         const src = audio.src;
         audio.addEventListener("loadedmetadata", () => {
@@ -163,10 +280,46 @@ function renderCaptions(selected, keepAudio = false) {
       say("Cue updated", "Exports will include your edits.");
     };
     editor.append(form);
-    body.append(editor);
+    const actions = element("div", "caption-actions");
+    const action = (label, handler) => {
+      const button = element("button", "button ghost", label);
+      button.type = "button";
+      button.onclick = handler;
+      actions.append(button);
+      return button;
+    };
+    action("Replay cue", () => {
+      audio.currentTime = cue.start;
+      replayEnd = cue.end;
+      audio.play().catch(() => { replayEnd = undefined; });
+    });
+    action("Split at playhead", () => {
+      const words = [...cue.text.matchAll(/\S+/gu)];
+      const time = Math.round(audio.currentTime * 1000) / 1000;
+      if (time <= cue.start || time >= cue.end || words.length < 2) {
+        say("Cannot split cue", "Put the playhead inside a cue with at least two words.");
+        return;
+      }
+      const ratio = (time - cue.start) / (cue.end - cue.start);
+      const point = Math.max(1, Math.min(words.length - 1, Math.round(ratio * words.length)));
+      const split = words[point].index;
+      cues.splice(i, 1, {start: cue.start, end: time, text: cue.text.slice(0, split).trim()},
+        {start: time, end: cue.end, text: cue.text.slice(split).trim()});
+      renderCaptions(selected, true);
+      say("Cue split", "Review the text on both sides of the split.");
+    });
+    if (cues[i + 1]) action("Merge next", () => {
+      const next = cues[i + 1];
+      cues.splice(i, 2, {start: cue.start, end: Math.max(cue.end, next.end), text: cue.text + "\n" + next.text});
+      renderCaptions(selected, true);
+      say("Cues merged", "Exports will include the combined caption.");
+    });
+    body.append(actions, editor);
     line.append(at, body);
     return line;
   }));
+  renderExportPreview();
+  syncTimeline();
 }
 
 function render(preferOutput) {
@@ -403,6 +556,7 @@ $("start").onclick = async () => {
         const pcm = await decode(item.file);
         if (isCancelled()) throw cancellation();
         decoded = true;
+        item.peaks = waveformPeaks(pcm);
         item.note = "Preparing Whisper";
         render();
         say("Preparing Whisper", item.file.name, null);

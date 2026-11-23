@@ -75,6 +75,15 @@
     .empty { min-height: 10rem; display: grid; gap: .2rem; align-content: center; justify-items: center; text-align: center; padding: .8rem; border: 1px solid var(--line); border-radius: .7rem; background: var(--page); }
     .result-content { display: grid; gap: .75rem; }
     audio { width: 100%; }
+    .timeline { position: relative; margin-block: .5rem; }
+    .timeline canvas { width: 100%; height: 4rem; display: block; }
+    .timeline input { width: 100%; display: block; margin: 0; }
+    .caption-actions { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .35rem; }
+    .caption-actions .button { min-height: 2rem; }
+    .caption-stage { position: relative; aspect-ratio: 16 / 9; background: #19241f; color: white; overflow: hidden; }
+    .caption-safe { position: absolute; inset: 10%; border: 1px dashed #ffffff80; pointer-events: none; }
+    .caption-overlay { position: absolute; inset-inline: 10%; text-align: center; white-space: pre-wrap; text-shadow: 0 1px 4px black; overflow-wrap: anywhere; }
+    #export-content { max-height: 18rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
     .caption-header { color: var(--muted); font-size: .875rem; }
     .captions { max-height: 28rem; overflow: auto; border-block: 1px solid var(--line); }
     .caption { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: .55rem; padding: .6rem .2rem; }
@@ -93,7 +102,7 @@
     .skip:focus { transform: none; background: white; z-index: 1; }
     @media (max-width: 43rem) { .workbench { grid-template-columns: minmax(0, 1fr); } }
   </style>
-  <script type="module" src="./workbench.v3.js?rev=4"></script>
+  <script type="module" src="./workbench.v3.js?rev=6"></script>
 </head>
 <body>
   <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -171,8 +180,38 @@
         <div class="result-content" id="result-content" hidden>
           <label>Transcribed file<select id="output-file"></select></label>
           <audio id="audio" controls preload="metadata" aria-label="Play the original audio"></audio>
+          <div class="timeline" aria-label="Audio timeline">
+            <canvas id="cue-wave" aria-hidden="true"></canvas>
+            <input id="cue-seek" type="range" min="0" max="0" step=".01" aria-label="Scrub audio timeline">
+          </div>
           <div class="caption-header" id="cue-count"></div>
           <div class="captions" id="captions" aria-label="Transcribed cues"></div>
+          <details>
+            <summary>Subtitle synchronization</summary>
+            <form id="sync-form">
+              <label>Delay in seconds <input name="offset" type="number" step="any" value="0" required></label>
+              <label>Timing scale (%) <input name="scale" type="number" min="1" max="1000" step="any" value="100" required></label>
+              <button class="button" type="submit">Apply to this file</button>
+              <p id="sync-status" role="status"></p>
+            </form>
+          </details>
+          <details>
+            <summary>Caption styling preview</summary>
+            <form id="style-form">
+              <label>Font <select name="font"><option value="system-ui">System</option><option value="Georgia">Serif</option><option value="monospace">Monospace</option></select></label>
+              <label>Size <input name="size" type="range" min="12" max="40" value="22"></label>
+              <label>Placement <select name="placement"><option value="bottom">Bottom</option><option value="top">Top</option><option value="center">Center</option></select></label>
+              <label><input name="safe" type="checkbox" checked> Show safe area</label>
+            </form>
+            <div class="caption-stage"><div id="caption-safe" class="caption-safe"></div><div id="caption-overlay" class="caption-overlay"></div></div>
+            <small>Preview only. Subtitle downloads contain text and timing.</small>
+          </details>
+          <details id="export-preview">
+            <summary>Preview export</summary>
+            <label>Format <select id="preview-format"><option value="srt">SRT</option><option value="vtt">WebVTT</option><option value="txt">Text</option></select></label>
+            <p id="export-review" role="status"></p>
+            <pre id="export-content"></pre>
+          </details>
           <div class="exports">
             <button type="button" class="button primary" data-format="srt">Download SRT</button>
             <button type="button" class="button" data-format="vtt">WebVTT</button>
