@@ -25,8 +25,8 @@ function playPipeline() {
 
 replay.addEventListener('click', playPipeline);
 const onScreen = new IntersectionObserver(entries => {
-  if (!entries.some(entry => entry.isIntersecting)) return;
+  if (!entries.some(entry => entry.intersectionRatio >= .6)) return;
   onScreen.disconnect();
   playPipeline();
-}, {threshold:.2});
+}, {threshold:.6});
 onScreen.observe(pipeline);
